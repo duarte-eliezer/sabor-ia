@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0b0d">
+    <title>SaborIA | Painel Administrativo</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div id="loginScreen" class="login-screen">
+        <form id="loginForm" class="login-card">
+            <div class="brand-mark">S</div>
+            <p class="eyebrow">GESTÃO INTELIGENTE</p>
+            <h1>Sabor<span>IA</span></h1>
+            <p class="login-description">Entre para administrar sua lancheria.</p>
+
+            <label for="email">E-mail</label>
+            <input id="email" type="email" placeholder="seu@email.com" required>
+
+            <label for="password">Senha</label>
+            <input id="password" type="password" placeholder="Sua senha" required>
+
+            <button type="submit" id="loginButton" class="primary-button">
+                Entrar no painel
+            </button>
+            <p id="loginMessage" class="feedback" aria-live="polite"></p>
+        </form>
+    </div>
+
+    <div id="adminApp" class="admin-app hidden">
+        <aside class="sidebar">
+            <a href="#" class="brand">
+                <span class="brand-mark small">S</span>
+                <span>Sabor<strong>IA</strong></span>
+            </a>
+
+            <p class="sidebar-label">MENU PRINCIPAL</p>
+            <nav>
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <span>▦</span> Visão geral
+                </a>
+                <a href="#products" class="nav-link" data-section="products">
+                    <span>☷</span> Produtos
+                </a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="admin-profile">
+                    <div class="avatar">A</div>
+                    <div>
+                        <strong>Administrador</strong>
+                        <small id="adminEmail">Conta conectada</small>
+                    </div>
+                </div>
+                <button id="logoutButton" class="logout-button">↪ Sair da conta</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">PAINEL DE CONTROLE</p>
+                    <h1 id="pageTitle">Visão geral</h1>
+                </div>
+                <span class="status-pill"><span></span> Sistema conectado</span>
+            </header>
+
+            <section id="dashboardSection" class="content-section">
+                <div class="welcome">
+                    <div>
+                        <p class="eyebrow">BEM-VINDO AO SABORIA</p>
+                        <h2>Gerencie sua lancheria.</h2>
+                        <p>Organize seus produtos e mantenha seu cardápio atualizado.</p>
+                    </div>
+                    <div class="welcome-icon">🍔</div>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <span class="stat-icon">☷</span>
+                        <p>Total de produtos</p>
+                        <strong id="totalProducts">0</strong>
+                        <small>Produtos cadastrados</small>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-icon">✓</span>
+                        <p>Disponíveis</p>
+                        <strong id="availableProducts">0</strong>
+                        <small>Visíveis no cardápio</small>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-icon">◷</span>
+                        <p>Indisponíveis</p>
+                        <strong id="unavailableProducts">0</strong>
+                        <small>Ocultos do cardápio</small>
+                    </article>
+                </div>
+
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">CATÁLOGO</p>
+                        <h2>Produtos recentes</h2>
+                    </div>
+                    <button class="primary-button compact" data-open-products>
+                        + Novo produto
+                    </button>
+                </div>
+                <div id="recentProducts" class="product-list"></div>
+            </section>
+
+            <section id="productsSection" class="content-section hidden">
+                <div class="section-heading products-heading">
+                    <div>
+                        <p class="eyebrow">SEU CARDÁPIO</p>
+                        <h2>Gerenciar produtos</h2>
+                        <p>Cadastre e mantenha seus produtos atualizados.</p>
+                    </div>
+                    <button id="newProductButton" class="primary-button compact">
+                        + Adicionar produto
+                    </button>
+                </div>
+
+                <div id="productFormCard" class="form-card hidden">
+                    <div class="section-heading">
+                        <div>
+                            <p class="eyebrow">CADASTRO</p>
+                            <h2 id="formTitle">Novo produto</h2>
+                        </div>
+                        <button type="button" id="cancelFormButton" class="text-button">
+                            Fechar ×
+                        </button>
+                    </div>
+
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="productName">Nome do produto *</label>
+                                <input id="productName" type="text" maxlength="100" required placeholder="Ex.: X-Bacon">
+                            </div>
+
+                            <div class="field">
+                                <label for="productCategory">Categoria *</label>
+                                <input id="productCategory" type="text" maxlength="60" required placeholder="Ex.: Hambúrguer">
+                            </div>
+
+                            <div class="field full">
+                                <label for="productDescription">Descrição</label>
+                                <textarea id="productDescription" rows="3" maxlength="500" placeholder="Descreva os ingredientes e detalhes do produto"></textarea>
+                            </div>
+
+                            <div class="field">
+                                <label for="productPrice">Preço (R$) *</label>
+                                <input id="productPrice" type="number" min="0.01" max="999999" step="0.01" required placeholder="27.90">
+                            </div>
+
+                            <div class="field">
+                                <label for="productControlType">Tipo de controle *</label>
+                                <select id="productControlType" required>
+                                    <option value="estoque">Estoque limitado</option>
+                                    <option value="sob_encomenda">Sob encomenda</option>
+                                </select>
+                                <small>Escolha se o produto terá quantidade controlada.</small>
+                            </div>
+
+                            <div id="quantityField" class="field">
+                                <label for="productQuantity">Quantidade disponível *</label>
+                                <input id="productQuantity" type="number" min="0" step="1" value="0" required>
+                                <small>Informe quantas unidades estão disponíveis.</small>
+                            </div>
+
+                            <div class="field full">
+                                <label for="productImage">Foto do produto</label>
+                                <input id="productImage" type="file" accept="image/jpeg,image/png,image/webp">
+                                <small>JPG, PNG ou WebP. Tamanho máximo: 2 MB.</small>
+                                <img id="imagePreview" class="image-preview hidden" alt="Prévia da imagem do produto">
+                            </div>
+
+                            <label class="availability-toggle">
+                                <input id="productAvailable" type="checkbox" checked>
+                                <span>Produto disponível no cardápio</span>
+                            </label>
+                        </div>
+
+                        <p id="productMessage" class="feedback" aria-live="polite"></p>
+                        <div class="form-actions">
+                            <button type="button" id="cancelFormButtonBottom" class="secondary-button">Cancelar</button>
+                            <button type="submit" id="saveProductButton" class="primary-button">Salvar produto</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="catalog-toolbar">
+                    <input id="productSearch" type="search" placeholder="Buscar produto...">
+                    <span id="productCount">0 produtos</span>
+                </div>
+
+                <div id="productsList" class="product-list"></div>
+            </section>
+
+            <p id="globalMessage" class="global-message" role="status" aria-live="polite"></p>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

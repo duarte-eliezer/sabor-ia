@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaborIA | Assistente Inteligente</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="chat-container">
+
+        <header class="chat-header">
+            <div class="logo">
+                <span>🍔</span>
+                <div>
+                    <h1>SaborIA</h1>
+                    <p>Assistente inteligente</p>
+                </div>
+            </div>
+
+            <span class="status">
+                <span class="status-dot"></span>
+                Online
+            </span>
+        </header>
+
+        <section class="chat-messages" id="chatMessages">
+
+            <div class="message assistant">
+                Olá! Seja bem-vindo à nossa lancheria! 🍔
+
+                Sou o SaborIA, seu assistente virtual.
+
+                Posso apresentar nosso cardápio e ajudar você a montar seu pedido. O que gostaria?
+            </div>
+
+            <div class="quick-actions">
+                <button type="button" id="showMenuButton">
+                    Ver cardápio
+                </button>
+
+                <button type="button" id="showCartButton">
+                    Meu pedido
+                </button>
+            </div>
+
+        </section>
+
+        <form class="chat-input" id="chatForm">
+            <input
+                type="text"
+                id="userInput"
+                placeholder="Digite sua mensagem..."
+                autocomplete="off"
+            >
+
+            <button type="submit" aria-label="Enviar mensagem">
+                Enviar
+            </button>
+        </form>
+
+        <footer class="chat-footer">
+            Atendimento inteligente SaborIA
+        </footer>
+
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+
+</body>
+</html>

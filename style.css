@@ -1,0 +1,863 @@
+
+/* =========================================
+   SABORIA — ESTILO PRINCIPAL
+========================================= */
+
+:root {
+    --background: #0b0b0d;
+    --surface: #151515;
+    --surface-light: #202020;
+    --surface-hover: #292929;
+    --gold: #d4af37;
+    --gold-light: #f0cc55;
+    --white: #f5f5f5;
+    --muted: #a5a5a5;
+    --border: #333333;
+    --success: #22c55e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--white);
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* =========================================
+   ESTRUTURA DO CHAT
+========================================= */
+
+.chat-container {
+    width: 100%;
+    max-width: 850px;
+    height: 90vh;
+    min-height: 550px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.45);
+}
+
+/* =========================================
+   CABEÇALHO
+========================================= */
+
+.chat-header {
+    background: #111111;
+    border-bottom: 1px solid var(--border);
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo > span {
+    font-size: 32px;
+}
+
+.logo h1 {
+    color: var(--gold);
+    font-size: 23px;
+}
+
+.logo p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.status {
+    color: var(--muted);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--success);
+    border-radius: 50%;
+}
+
+/* =========================================
+   MENSAGENS
+========================================= */
+
+.chat-messages {
+    flex: 1;
+    min-height: 0;
+    padding: 22px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 10px;
+}
+
+.message {
+    max-width: 85%;
+    padding: 13px 16px;
+    border-radius: 14px;
+    line-height: 1.5;
+    white-space: pre-line;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.message.assistant {
+    background: #242424;
+    border: 1px solid var(--border);
+    color: var(--white);
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.message.user {
+    background: var(--gold);
+    color: #111;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+/* =========================================
+   BOTÕES RÁPIDOS
+========================================= */
+
+.quick-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.quick-actions button {
+    background: transparent;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 9px 15px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: 0.2s;
+}
+
+.quick-actions button:hover {
+    background: var(--gold);
+    color: #111;
+}
+
+/* =========================================
+   CARDÁPIO DENTRO DA CONVERSA
+========================================= */
+
+.message-menu {
+    width: 100%;
+    max-width: 100%;
+}
+
+.menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+/* CARD DO PRODUTO */
+
+.product-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    width: 100%;
+    min-height: 120px;
+    padding: 10px;
+    background: #1b1b1b;
+    border: 1px solid #333;
+    border-radius: 12px;
+    transition: border-color 0.2s;
+}
+
+.product-card:hover {
+    border-color: #806b2b;
+}
+
+.product-card img,
+.product-placeholder {
+    width: 100px;
+    height: 100px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    object-fit: cover;
+    background: #292929;
+}
+
+.product-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.product-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+}
+
+.product-info h3 {
+    color: var(--gold);
+    font-size: 15px;
+    line-height: 1.3;
+    margin-bottom: 5px;
+}
+
+.product-description {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 7px;
+}
+
+.product-price {
+    color: var(--white);
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 9px;
+}
+
+/* CONTROLES DO PRODUTO */
+
+.product-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
+}
+
+.quantity-control button,
+.cart-item button {
+    background: #333;
+    color: var(--white);
+    border: 1px solid #555;
+    border-radius: 7px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.quantity-control button:hover,
+.cart-item button:hover {
+    background: #484848;
+}
+
+.quantity-control span {
+    min-width: 16px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.add-button {
+    flex: 1;
+    max-width: 150px;
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 7px;
+    padding: 9px 11px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.add-button:hover {
+    background: var(--gold-light);
+}
+
+/* =========================================
+   BARRA DO CARRINHO
+========================================= */
+
+#orderActions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    width: 100%;
+    padding: 13px 16px;
+    margin-top: auto;
+    background: #181818;
+    border: 1px solid #55451c;
+    border-radius: 12px;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.25);
+}
+
+#orderActions h3 {
+    color: var(--gold);
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+#orderActions p {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 9px;
+}
+
+#orderActions button {
+    width: 100%;
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#orderActions button:hover {
+    background: var(--gold-light);
+}
+
+/* =========================================
+   REVISÃO DO CARRINHO
+========================================= */
+
+.cart-summary {
+    width: 100%;
+    max-width: 100%;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.cart-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.cart-item-info strong {
+    display: block;
+    color: var(--gold);
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.cart-item-info span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.cart-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.checkout-button {
+    width: 100%;
+    margin-top: 14px;
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.checkout-button:hover {
+    background: var(--gold-light);
+}
+
+.empty-cart {
+    color: var(--muted);
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+/* =========================================
+   ÁREA DE DIGITAÇÃO
+========================================= */
+
+.chat-input {
+    display: flex;
+    gap: 10px;
+    padding: 15px 18px;
+    background: #111;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.chat-input input {
+    flex: 1;
+    min-width: 0;
+    background: #242424;
+    border: 1px solid #444;
+    border-radius: 25px;
+    padding: 13px 17px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+}
+
+.chat-input input:focus {
+    border-color: var(--gold);
+}
+
+.chat-input button {
+    background: var(--gold);
+    color: #111;
+    border: none;
+    border-radius: 25px;
+    padding: 0 22px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.chat-input button:hover {
+    background: var(--gold-light);
+}
+
+/* =========================================
+   RODAPÉ
+========================================= */
+
+.chat-footer {
+    text-align: center;
+    color: #666;
+    font-size: 10px;
+    padding: 8px;
+    background: #111;
+    flex-shrink: 0;
+}
+
+/* =========================================
+   RESPONSIVIDADE — CELULAR
+========================================= */
+
+@media (max-width: 600px) {
+
+    body {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .chat-container {
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0;
+        border: none;
+        border-radius: 0;
+    }
+
+    .chat-header {
+        padding: 14px 16px;
+    }
+
+    .logo {
+        gap: 9px;
+    }
+
+    .logo > span {
+        font-size: 27px;
+    }
+
+    .logo h1 {
+        font-size: 20px;
+    }
+
+    .logo p {
+        font-size: 11px;
+    }
+
+    .status {
+        font-size: 11px;
+    }
+
+    .chat-messages {
+        padding: 14px;
+        gap: 14px;
+    }
+
+    .message {
+        max-width: 95%;
+        padding: 12px 13px;
+        font-size: 13px;
+    }
+
+    .product-card {
+        gap: 10px;
+        min-height: 105px;
+        padding: 8px;
+    }
+
+    .product-card img,
+    .product-placeholder {
+        width: 82px;
+        height: 82px;
+    }
+
+    .product-info h3 {
+        font-size: 13px;
+    }
+
+    .product-description {
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+
+    .product-price {
+        font-size: 15px;
+        margin-bottom: 7px;
+    }
+
+    .product-actions {
+        gap: 6px;
+    }
+
+    .quantity-control {
+        gap: 5px;
+    }
+
+    .quantity-control button {
+        width: 25px;
+        height: 25px;
+    }
+
+    .add-button {
+        padding: 8px 9px;
+        font-size: 11px;
+    }
+
+    #orderActions {
+        padding: 11px;
+    }
+
+    .chat-input {
+        padding: 11px;
+        gap: 8px;
+    }
+
+    .chat-input input {
+        padding: 12px 14px;
+        font-size: 13px;
+    }
+
+    .chat-input button {
+        padding: 0 17px;
+        font-size: 12px;
+    }
+
+    .chat-footer {
+        padding: 6px;
+    }
+}
+
+/* =========================================
+   CELULARES PEQUENOS
+========================================= */
+
+@media (max-width: 360px) {
+
+    .product-card {
+        gap: 8px;
+        padding: 7px;
+    }
+
+    .product-card img,
+    .product-placeholder {
+        width: 72px;
+        height: 72px;
+    }
+
+    .product-actions {
+        flex-wrap: wrap;
+    }
+
+    .add-button {
+        padding: 7px;
+        font-size: 10px;
+    }
+
+    .chat-header {
+        padding: 12px;
+    }
+
+    .status {
+        font-size: 10px;
+    }
+}
+
+
+/* =========================================
+   AJUSTES COMPACTOS DO SABORIA
+========================================= */
+
+.message-menu {
+    padding: 12px;
+}
+
+.menu-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.product-stock {
+    color: #888;
+    font-size: 10px;
+    margin-bottom: 5px;
+}
+
+.product-card {
+    min-height: 0;
+}
+
+.product-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Carrinho compacto */
+
+#orderActions {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    align-self: stretch;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: #191919;
+    border: 1px solid #55451c;
+    border-radius: 10px;
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.25);
+}
+
+.cart-bar-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.cart-bar-info div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cart-bar-info strong {
+    color: #d4af37;
+    font-size: 13px;
+}
+
+.cart-bar-info span {
+    color: #aaa;
+    font-size: 11px;
+}
+
+.cart-bar-total {
+    white-space: nowrap;
+}
+
+.cart-finish-button {
+    width: 100%;
+    padding: 9px;
+    border: none;
+    border-radius: 7px;
+    background: #d4af37;
+    color: #111;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cart-status {
+    display: block;
+    color: #ffb4a2;
+    font-size: 11px;
+    margin-bottom: 7px;
+}
+
+/* Opções depois de clicar em finalizar */
+
+.order-ready {
+    max-width: 100%;
+    padding: 12px;
+}
+
+.order-ready > strong {
+    display: block;
+    color: #d4af37;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.order-ready p {
+    color: #bbb;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.order-ready-actions,
+.cart-review-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.order-ready-actions button,
+.cart-review-actions button {
+    flex: 1;
+    padding: 9px 7px;
+    border: 1px solid #d4af37;
+    border-radius: 7px;
+    background: transparent;
+    color: #d4af37;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.order-ready-actions button:last-child,
+.cart-review-actions button:last-child {
+    background: #d4af37;
+    color: #111;
+}
+
+/* Revisão compacta */
+
+.cart-summary {
+    max-width: 100%;
+    padding: 12px;
+}
+
+.cart-review-title {
+    display: block;
+    color: #d4af37;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.cart-item {
+    padding: 8px 0;
+    gap: 8px;
+}
+
+.cart-item-info strong {
+    font-size: 12px;
+}
+
+.cart-item-info span {
+    font-size: 11px;
+}
+
+.cart-item-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cart-item-controls button {
+    width: 24px;
+    height: 24px;
+}
+
+.cart-item-controls span {
+    font-size: 12px;
+}
+
+.cart-item-subtotal {
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.cart-total {
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.cart-review-actions {
+    margin-top: 10px;
+}
+
+@media (max-width: 400px) {
+    .message-menu,
+    .cart-summary,
+    .order-ready {
+        padding: 9px;
+    }
+
+    .product-card img,
+    .product-placeholder {
+        width: 75px;
+        height: 75px;
+    }
+
+    .cart-item {
+        flex-wrap: wrap;
+    }
+
+    .cart-item-subtotal {
+        margin-left: auto;
+    }
+}
