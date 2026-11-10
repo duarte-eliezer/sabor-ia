@@ -1,4 +1,3 @@
-
 // ==========================================
 // CONEXÃO COM O SUPABASE
 // ==========================================
@@ -39,7 +38,6 @@ const showCartButton = document.getElementById("showCartButton");
 let produtos = [];
 let carrinho = [];
 let quantidades = {};
-let carregandoProdutos = false;
 let ultimoAvisoCarrinho = "";
 
 let proximoItemId = 1;
@@ -130,40 +128,86 @@ function removerDigitando() {
 // CARREGAR PRODUTOS
 // ==========================================
 
-async function carregarProdutos() {
-    if (carregandoProdutos) return;
+// Compartilha uma única consulta ao Supabase.
+// Assim, duas funções podem aguardar o mesmo carregamento.
 
-    carregandoProdutos = true;
+let promessaCarregamentoProdutos = null;
 
-    const { data, error } = await banco
-        .from("produtos")
-        .select("*")
-        .eq("disponivel", true)
-        .order("created_at", { ascending: true });
+async function carregarProdutos(
+    exibirCardapio = true,
+    atualizar = false
+) {
 
-    carregandoProdutos = false;
+    // Se os produtos já estiverem carregados,
+    // aproveitamos os dados que estão na memória.
 
-    if (error) {
-        console.error("Erro ao carregar produtos:", error);
+    if (produtos.length > 0 && !atualizar) {
+        if (exibirCardapio) {
+            mostrarCardapio();
+        }
 
-        adicionarMensagem(
-            "Não consegui carregar o cardápio agora. Tente novamente."
-        );
-
-        return;
+        return true;
     }
 
-    produtos = data || [];
+    // Se já houver uma consulta em andamento,
+    // aguardamos essa mesma consulta.
 
-    if (produtos.length === 0) {
-        adicionarMensagem(
-            "Ainda não temos produtos disponíveis no cardápio."
-        );
+    if (!promessaCarregamentoProdutos) {
+        promessaCarregamentoProdutos = (async () => {
 
-        return;
+            const { data, error } = await banco
+                .from("produtos")
+                .select("*")
+                .eq("disponivel", true)
+                .order("created_at", { ascending: true });
+
+            if (error) {
+                throw error;
+            }
+
+            produtos = data || [];
+
+            return produtos.length > 0;
+
+        })();
     }
 
-    mostrarCardapio();
+    try {
+        const encontrouProdutos =
+            await promessaCarregamentoProdutos;
+
+        if (exibirCardapio) {
+
+            if (encontrouProdutos) {
+                mostrarCardapio();
+
+            } else {
+                adicionarMensagem(
+                    "Ainda não temos produtos disponíveis no cardápio."
+                );
+            }
+        }
+
+        return encontrouProdutos;
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao carregar produtos:",
+            error
+        );
+
+        if (exibirCardapio) {
+            adicionarMensagem(
+                "Não consegui carregar o cardápio agora. Tente novamente."
+            );
+        }
+
+        return false;
+
+    } finally {
+        promessaCarregamentoProdutos = null;
+    }
 }
 
 // ==========================================
@@ -171,6 +215,7 @@ async function carregarProdutos() {
 // ==========================================
 
 function mostrarCardapio() {
+
     const anterior = document.getElementById("menuMessage");
 
     if (anterior) {
@@ -187,14 +232,17 @@ function mostrarCardapio() {
     `;
 
     const grade = document.createElement("div");
+
     grade.className = "menu-grid";
 
     produtos.forEach(produto => {
+
         const card = document.createElement("article");
 
         card.className = "product-card";
 
-        const quantidade = quantidades[String(produto.id)] || 1;
+        const quantidade =
+            quantidades[String(produto.id)] || 1;
 
         const imagem = produto.imagem_url
             ? `<img src="${escaparHTML(produto.imagem_url)}" alt="${escaparHTML(produto.nome)}">`
@@ -267,6 +315,7 @@ function mostrarCardapio() {
     });
 
     mensagem.appendChild(grade);
+
     chatMessages.appendChild(mensagem);
 
     atualizarBotoesPedido();
@@ -279,15 +328,20 @@ function mostrarCardapio() {
 // ==========================================
 
 function atualizarQuantidadeVisual(id) {
-    const contador = document.getElementById(`quantidade-${id}`);
+
+    const contador =
+        document.getElementById(`quantidade-${id}`);
 
     if (contador) {
-        contador.textContent = quantidades[String(id)] || 1;
+        contador.textContent =
+            quantidades[String(id)] || 1;
     }
 }
 
 function mostrarAvisoProduto(id, texto) {
-    const aviso = document.getElementById(`aviso-${id}`);
+
+    const aviso =
+        document.getElementById(`aviso-${id}`);
 
     if (aviso) {
         aviso.textContent = texto;
@@ -299,9 +353,15 @@ function mostrarAvisoProduto(id, texto) {
 // ==========================================
 
 function quantidadeNoCarrinho(produtoId) {
+
     return carrinho
-        .filter(item => String(item.id) === String(produtoId))
-        .reduce((total, item) => total + item.quantidade, 0);
+        .filter(item =>
+            String(item.id) === String(produtoId)
+        )
+        .reduce(
+            (total, item) => total + item.quantidade,
+            0
+        );
 }
 
 // ==========================================
@@ -313,18 +373,29 @@ function adicionarAoCarrinho(
     quantidade,
     observacao = ""
 ) {
-    if (!produto || !Number.isInteger(quantidade) || quantidade < 1) {
+
+    if (
+        !produto ||
+        !Number.isInteger(quantidade) ||
+        quantidade < 1
+    ) {
         return false;
     }
 
     const id = String(produto.id);
 
-    const quantidadeAtual = quantidadeNoCarrinho(id);
+    const quantidadeAtual =
+        quantidadeNoCarrinho(id);
 
-    const novaQuantidade = quantidadeAtual + quantidade;
+    const novaQuantidade =
+        quantidadeAtual + quantidade;
+
+    // Verificar estoque
 
     if (produto.tipo_controle !== "sob_encomenda") {
+
         if (novaQuantidade > Number(produto.quantidade)) {
+
             ultimoAvisoCarrinho =
                 `Estoque insuficiente para ${produto.nome}.`;
 
@@ -339,17 +410,25 @@ function adicionarAoCarrinho(
         }
     }
 
-    const nota = String(observacao || "").trim().slice(0, 200);
+    const nota = String(observacao || "")
+        .trim()
+        .slice(0, 200);
+
+    // Verificar se o mesmo produto já existe
+    // com a mesma observação.
 
     const itemExistente = carrinho.find(item =>
         String(item.id) === id &&
-        normalizarTexto(item.observacao) === normalizarTexto(nota)
+        normalizarTexto(item.observacao) ===
+        normalizarTexto(nota)
     );
 
     if (itemExistente) {
+
         itemExistente.quantidade += quantidade;
 
     } else {
+
         carrinho.push({
             item_id: proximoItemId++,
             id: produto.id,
@@ -375,7 +454,9 @@ function adicionarAoCarrinho(
 // ==========================================
 
 function processarAcoesIA(acoes) {
+
     const recusados = [];
+
     let quantidadeAdicionada = 0;
 
     if (!Array.isArray(acoes)) {
@@ -386,9 +467,13 @@ function processarAcoesIA(acoes) {
     }
 
     acoes.forEach(acao => {
+
         if (!acao || acao.type !== "add_item") {
             return;
         }
+
+        // Primeiro procura pelo ID.
+        // Se não encontrar, procura pelo nome normalizado.
 
         const produto = produtos.find(item =>
             String(item.id) === String(acao.product_id)
@@ -398,6 +483,7 @@ function processarAcoesIA(acoes) {
         );
 
         if (!produto) {
+
             recusados.push(
                 `Não encontrei "${acao.product_name}" no cardápio atual.`
             );
@@ -412,6 +498,7 @@ function processarAcoesIA(acoes) {
             quantidade < 1 ||
             quantidade > 20
         ) {
+
             recusados.push(
                 `Não consegui validar a quantidade de ${produto.nome}.`
             );
@@ -431,9 +518,11 @@ function processarAcoesIA(acoes) {
         );
 
         if (adicionou) {
+
             quantidadeAdicionada += quantidade;
 
         } else {
+
             recusados.push(
                 `Não consegui adicionar ${quantidade} unidade(s) de ${produto.nome} por causa do estoque disponível.`
             );
@@ -451,14 +540,21 @@ function processarAcoesIA(acoes) {
 // ==========================================
 
 function atualizarBotoesPedido() {
-    let painel = document.getElementById("orderActions");
+
+    let painel =
+        document.getElementById("orderActions");
 
     if (carrinho.length === 0) {
-        if (painel) painel.remove();
+
+        if (painel) {
+            painel.remove();
+        }
+
         return;
     }
 
     if (!painel) {
+
         painel = document.createElement("div");
 
         painel.id = "orderActions";
@@ -474,8 +570,10 @@ function atualizarBotoesPedido() {
 
     painel.innerHTML = `
         <div class="cart-bar-info">
+
             <div>
                 <strong>🛒 Meu pedido</strong>
+
                 <span>
                     ${quantidadeTotal}
                     ${quantidadeTotal === 1 ? "item" : "itens"}
@@ -485,6 +583,7 @@ function atualizarBotoesPedido() {
             <strong class="cart-bar-total">
                 ${formatarPreco(calcularTotal())}
             </strong>
+
         </div>
 
         ${ultimoAvisoCarrinho
@@ -507,7 +606,9 @@ function atualizarBotoesPedido() {
 // ==========================================
 
 function mostrarOpcoesPedido() {
+
     if (carrinho.length === 0) {
+
         adicionarMensagem(
             "Seu carrinho ainda está vazio. Escolha alguns produtos primeiro."
         );
@@ -515,9 +616,12 @@ function mostrarOpcoesPedido() {
         return;
     }
 
-    const anterior = document.getElementById("orderReady");
+    const anterior =
+        document.getElementById("orderReady");
 
-    if (anterior) anterior.remove();
+    if (anterior) {
+        anterior.remove();
+    }
 
     const mensagem = document.createElement("div");
 
@@ -558,9 +662,13 @@ function mostrarOpcoesPedido() {
 // ==========================================
 
 function mostrarCarrinho() {
-    const anterior = document.getElementById("cartReview");
 
-    if (anterior) anterior.remove();
+    const anterior =
+        document.getElementById("cartReview");
+
+    if (anterior) {
+        anterior.remove();
+    }
 
     const mensagem = document.createElement("div");
 
@@ -572,6 +680,7 @@ function mostrarCarrinho() {
     `;
 
     if (carrinho.length === 0) {
+
         const vazio = document.createElement("p");
 
         vazio.className = "empty-cart";
@@ -580,10 +689,13 @@ function mostrarCarrinho() {
         mensagem.appendChild(vazio);
 
     } else {
+
         const lista = document.createElement("div");
+
         lista.className = "cart-review-list";
 
         carrinho.forEach(item => {
+
             const linha = document.createElement("div");
 
             linha.className = "cart-item";
@@ -676,23 +788,32 @@ function mostrarCarrinho() {
 // ==========================================
 
 function alterarQuantidadeRevisao(itemId, acao) {
+
     const item = carrinho.find(
-        produto => String(produto.item_id) === String(itemId)
+        produto =>
+            String(produto.item_id) === String(itemId)
     );
 
     if (!item) return;
 
     const produto = produtos.find(
-        produto => String(produto.id) === String(item.id)
+        produto =>
+            String(produto.id) === String(item.id)
     );
 
     if (!produto) return;
 
     if (acao === "aumentar") {
-        const quantidadeAtual = quantidadeNoCarrinho(item.id);
+
+        const quantidadeAtual =
+            quantidadeNoCarrinho(item.id);
 
         if (produto.tipo_controle !== "sob_encomenda") {
-            if (quantidadeAtual >= Number(produto.quantidade)) {
+
+            if (
+                quantidadeAtual >= Number(produto.quantidade)
+            ) {
+
                 adicionarMensagem(
                     `Temos somente ${produto.quantidade} unidade(s) de ${produto.nome}.`
                 );
@@ -705,16 +826,20 @@ function alterarQuantidadeRevisao(itemId, acao) {
     }
 
     if (acao === "diminuir") {
+
         item.quantidade--;
 
         if (item.quantidade <= 0) {
+
             carrinho = carrinho.filter(
-                produto => produto.item_id !== item.item_id
+                produto =>
+                    produto.item_id !== item.item_id
             );
         }
     }
 
     atualizarBotoesPedido();
+
     mostrarCarrinho();
 }
 
@@ -723,8 +848,10 @@ function alterarQuantidadeRevisao(itemId, acao) {
 // ==========================================
 
 function calcularTotal() {
+
     return carrinho.reduce(
-        (soma, item) => soma + item.preco * item.quantidade,
+        (soma, item) =>
+            soma + item.preco * item.quantidade,
         0
     );
 }
@@ -734,25 +861,33 @@ function calcularTotal() {
 // ==========================================
 
 function finalizarPedido() {
+
     if (carrinho.length === 0) {
+
         adicionarMensagem("Seu pedido está vazio.");
+
         return;
     }
 
     const total = calcularTotal();
 
-    let mensagem = "Olá! Gostaria de confirmar este pedido:\n\n";
+    let mensagem =
+        "Olá! Gostaria de confirmar este pedido:\n\n";
 
     carrinho.forEach(item => {
+
         mensagem +=
             `${item.quantidade}x ${item.nome} - ${formatarPreco(item.preco * item.quantidade)}\n`;
 
         if (item.observacao) {
-            mensagem += `   Observação: ${item.observacao}\n`;
+
+            mensagem +=
+                `   Observação: ${item.observacao}\n`;
         }
     });
 
-    mensagem += `\nTotal: ${formatarPreco(total)}`;
+    mensagem +=
+        `\nTotal: ${formatarPreco(total)}`;
 
     const link =
         `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
@@ -766,15 +901,21 @@ function finalizarPedido() {
 
 chatMessages.addEventListener("click", event => {
 
-    // Botões dos produtos
+    // ======================================
+    // BOTÕES DOS PRODUTOS
+    // ======================================
 
     const botaoProduto = event.target.closest(
         "button[data-action]"
     );
 
     if (botaoProduto) {
+
         const acao = botaoProduto.dataset.action;
-        const id = String(botaoProduto.dataset.id);
+
+        const id = String(
+            botaoProduto.dataset.id
+        );
 
         const produto = produtos.find(
             item => String(item.id) === id
@@ -782,15 +923,18 @@ chatMessages.addEventListener("click", event => {
 
         if (!produto) return;
 
-        const quantidadeAtual = quantidades[id] || 1;
+        const quantidadeAtual =
+            quantidades[id] || 1;
 
         if (acao === "aumentar") {
+
             const limite =
                 produto.tipo_controle === "sob_encomenda"
                     ? Infinity
                     : Number(produto.quantidade);
 
             if (quantidadeAtual >= limite) {
+
                 mostrarAvisoProduto(
                     id,
                     `Disponível somente ${produto.quantidade} unidade(s).`
@@ -803,6 +947,7 @@ chatMessages.addEventListener("click", event => {
         }
 
         if (acao === "diminuir") {
+
             quantidades[id] = Math.max(
                 1,
                 quantidadeAtual - 1
@@ -810,6 +955,7 @@ chatMessages.addEventListener("click", event => {
         }
 
         if (acao === "adicionar") {
+
             const adicionou = adicionarAoCarrinho(
                 produto,
                 quantidadeAtual
@@ -825,14 +971,18 @@ chatMessages.addEventListener("click", event => {
         return;
     }
 
-    // Botões do carrinho e finalização
+    // ======================================
+    // BOTÕES DO CARRINHO E FINALIZAÇÃO
+    // ======================================
 
     const botaoPedido = event.target.closest(
         "[data-order-action]"
     );
 
     if (botaoPedido) {
-        const acao = botaoPedido.dataset.orderAction;
+
+        const acao =
+            botaoPedido.dataset.orderAction;
 
         if (acao === "concluir") {
             mostrarOpcoesPedido();
@@ -847,17 +997,26 @@ chatMessages.addEventListener("click", event => {
         }
 
         if (acao === "editar") {
-            const revisao = document.getElementById("cartReview");
 
-            if (revisao) revisao.remove();
+            const revisao =
+                document.getElementById("cartReview");
 
-            const opcoes = document.getElementById("orderReady");
+            if (revisao) {
+                revisao.remove();
+            }
 
-            if (opcoes) opcoes.remove();
+            const opcoes =
+                document.getElementById("orderReady");
 
-            const cardapio = document.getElementById("menuMessage");
+            if (opcoes) {
+                opcoes.remove();
+            }
+
+            const cardapio =
+                document.getElementById("menuMessage");
 
             if (cardapio) {
+
                 cardapio.scrollIntoView({
                     behavior: "smooth",
                     block: "start"
@@ -868,13 +1027,16 @@ chatMessages.addEventListener("click", event => {
         return;
     }
 
-    // Botões de quantidade da revisão
+    // ======================================
+    // BOTÕES DE QUANTIDADE DA REVISÃO
+    // ======================================
 
     const botaoRevisao = event.target.closest(
         "[data-review-action]"
     );
 
     if (botaoRevisao) {
+
         alterarQuantidadeRevisao(
             botaoRevisao.dataset.itemId,
             botaoRevisao.dataset.reviewAction
@@ -887,7 +1049,9 @@ chatMessages.addEventListener("click", event => {
 // ==========================================
 
 function processarMensagem(texto) {
-    const textoNormalizado = normalizarTexto(texto);
+
+    const textoNormalizado =
+        normalizarTexto(texto);
 
     // Comandos diretos do pedido
 
@@ -897,7 +1061,9 @@ function processarMensagem(texto) {
         textoNormalizado.includes("fechar pedido") ||
         textoNormalizado.includes("pode fechar")
     ) {
+
         mostrarOpcoesPedido();
+
         return;
     }
 
@@ -906,7 +1072,9 @@ function processarMensagem(texto) {
         textoNormalizado.includes("conferir pedido") ||
         textoNormalizado.includes("ver meu pedido")
     ) {
+
         mostrarCarrinho();
+
         return;
     }
 
@@ -914,7 +1082,9 @@ function processarMensagem(texto) {
         textoNormalizado.includes("cardapio") ||
         textoNormalizado.includes("menu")
     ) {
+
         carregarProdutos();
+
         return;
     }
 
@@ -923,12 +1093,14 @@ function processarMensagem(texto) {
         textoNormalizado.includes("meu carrinho") ||
         textoNormalizado.includes("meu pedido")
     ) {
+
         mostrarCarrinho();
+
         return;
     }
 
     // Todas as demais mensagens vão para a IA.
-    // Assim, ela interpreta quantidades, produtos e observações.
+    // Ela interpreta quantidades, produtos e observações.
 
     conversarComIA(texto);
 }
@@ -938,7 +1110,9 @@ function processarMensagem(texto) {
 // ==========================================
 
 async function conversarComIA(texto) {
+
     if (iaOcupada) {
+
         adicionarMensagem(
             "Só um instante! Estou terminando de responder sua mensagem anterior."
         );
@@ -958,7 +1132,28 @@ async function conversarComIA(texto) {
     mostrarDigitando();
 
     try {
+
+        // ======================================
+        // CORREÇÃO DO CARREGAMENTO DOS PRODUTOS
+        // ======================================
+
+        // A IA consulta os produtos no servidor,
+        // mas o carrinho é montado neste navegador.
+        //
+        // Por isso, precisamos carregar os produtos
+        // antes de processar as ações retornadas pela IA.
+
+        if (produtos.length === 0) {
+
+            await carregarProdutos(false);
+        }
+
+        // ======================================
+        // CONSULTAR A INTELIGÊNCIA ARTIFICIAL
+        // ======================================
+
         const resposta = await fetch(IA_ENDPOINT, {
+
             method: "POST",
 
             headers: {
@@ -972,9 +1167,13 @@ async function conversarComIA(texto) {
         });
 
         if (!resposta.ok) {
+
             const erro = await resposta.text();
 
-            console.error("Resposta da função:", erro);
+            console.error(
+                "Resposta da função:",
+                erro
+            );
 
             throw new Error(
                 "Não foi possível consultar a inteligência artificial."
@@ -984,6 +1183,7 @@ async function conversarComIA(texto) {
         const dados = await resposta.json();
 
         if (!dados.reply) {
+
             throw new Error(
                 "A IA não retornou uma resposta válida."
             );
@@ -995,49 +1195,68 @@ async function conversarComIA(texto) {
             ? dados.actions
             : [];
 
-        // Compatibilidade caso a IA retorne JSON dentro da mensagem
+        // ======================================
+        // COMPATIBILIDADE COM RESPOSTA EM JSON
+        // ======================================
 
         if (typeof textoResposta === "string") {
+
             try {
+
                 const textoLimpo = textoResposta
                     .replace(/^```json\s*/i, "")
                     .replace(/^```\s*/i, "")
                     .replace(/\s*```$/i, "")
                     .trim();
 
-                const possivelJSON = JSON.parse(textoLimpo);
+                const possivelJSON =
+                    JSON.parse(textoLimpo);
 
                 if (
                     possivelJSON &&
                     typeof possivelJSON === "object" &&
                     typeof possivelJSON.reply === "string"
                 ) {
-                    textoResposta = possivelJSON.reply;
+
+                    textoResposta =
+                        possivelJSON.reply;
 
                     if (
                         Array.isArray(possivelJSON.actions) &&
                         acoes.length === 0
                     ) {
+
                         acoes = possivelJSON.actions;
                     }
                 }
 
             } catch {
+
                 // A resposta já era um texto normal.
             }
         }
 
-        // Executar as ações solicitadas pela IA
+        // ======================================
+        // EXECUTAR AÇÕES DA IA
+        // ======================================
 
-        const resultadoAcoes = processarAcoesIA(acoes);
+        const resultadoAcoes =
+            processarAcoesIA(acoes);
 
-        // Corrigir a mensagem se alguma ação não pôde ser executada
+        // ======================================
+        // VERIFICAR AÇÕES RECUSADAS
+        // ======================================
 
         if (resultadoAcoes.recusados.length > 0) {
+
             textoResposta +=
                 "\n\nAtenção: algumas quantidades não puderam ser adicionadas:\n" +
                 resultadoAcoes.recusados.join("\n");
         }
+
+        // ======================================
+        // SALVAR HISTÓRICO
+        // ======================================
 
         historicoIA.push({
             role: "assistant",
@@ -1046,11 +1265,16 @@ async function conversarComIA(texto) {
 
         historicoIA = historicoIA.slice(-10);
 
+        // ======================================
+        // MOSTRAR RESPOSTA
+        // ======================================
+
         removerDigitando();
 
         adicionarMensagem(textoResposta);
 
     } catch (erro) {
+
         console.error("Erro na IA:", erro);
 
         removerDigitando();
@@ -1062,6 +1286,7 @@ async function conversarComIA(texto) {
         );
 
     } finally {
+
         iaOcupada = false;
     }
 }
@@ -1071,6 +1296,7 @@ async function conversarComIA(texto) {
 // ==========================================
 
 chatForm.addEventListener("submit", event => {
+
     event.preventDefault();
 
     const texto = userInput.value.trim();
@@ -1078,6 +1304,7 @@ chatForm.addEventListener("submit", event => {
     if (!texto) return;
 
     if (iaOcupada) {
+
         adicionarMensagem(
             "Aguarde minha resposta anterior para enviar outra mensagem."
         );
@@ -1097,9 +1324,13 @@ chatForm.addEventListener("submit", event => {
 // ==========================================
 
 showMenuButton.addEventListener("click", () => {
+
     carregarProdutos();
+
 });
 
 showCartButton.addEventListener("click", () => {
+
     mostrarCarrinho();
+
 });
